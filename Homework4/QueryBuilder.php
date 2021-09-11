@@ -4,15 +4,15 @@ namespace Homework4;
 
 abstract class QueryBuilder
 {
-    protected Connection $connection;
-    protected string     $table;
-    protected string     $criteries = '';
+    protected AConnection $connection;
+    protected string      $table;
+    protected string      $criteries = '';
 
     /**
-     * @param Connection $connection
+     * @param AConnection $connection
      * @param string $table
      */
-    public function __construct(Connection $connection, string $table)
+    public function __construct(AConnection $connection, string $table)
     {
         $this->connection = $connection;
         $this->table      = $table;

@@ -2,7 +2,7 @@
 
 namespace Homework4\MySql;
 
-use Homework4\Connection as AConnection;
+use Homework4\AConnection;
 
 class Connection extends AConnection
 {

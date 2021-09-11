@@ -2,7 +2,7 @@
 
 namespace Homework4;
 
-abstract class Connection
+abstract class AConnection
 {
     protected bool $status = false;
 

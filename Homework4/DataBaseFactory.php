@@ -5,22 +5,22 @@ namespace Homework4;
 interface DataBaseFactory
 {
     /**
-     * @return Connection
+     * @return AConnection
      */
-    public function getConnection(): Connection;
+    public function getConnection(): AConnection;
 
     /**
-     * @param Connection $connection
+     * @param AConnection $connection
      * @param string $table
      * @param int $id
      * @return Record
      */
-    public function getRecord(Connection $connection, string $table, int $id): Record;
+    public function getRecord(AConnection $connection, string $table, int $id): Record;
 
     /**
-     * @param Connection $connection
+     * @param AConnection $connection
      * @param string $table
      * @return QueryBuilder
      */
-    public function getQueryBuilder(Connection $connection, string $table): QueryBuilder;
+    public function getQueryBuilder(AConnection $connection, string $table): QueryBuilder;
 }
