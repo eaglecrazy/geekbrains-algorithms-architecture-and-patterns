@@ -4,9 +4,9 @@
  */
 require 'vendor/autoload.php';
 
-use Homework5\Notifier\Email;
-use Homework5\Notifier\Slack;
-use Homework5\Notifier\Sms;
+use Homework5\Decorator\Notifier\Email;
+use Homework5\Decorator\Notifier\Slack;
+use Homework5\Decorator\Notifier\Sms;
 
 $separator = '***********************************' . PHP_EOL;
 

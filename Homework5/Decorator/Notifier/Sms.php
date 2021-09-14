@@ -1,10 +1,10 @@
 <?php
 
-namespace Homework5\Notifier;
+namespace Homework5\Decorator\Notifier;
 
-use Homework5\NotifierDecorator;
+use Homework5\Decorator\NotifierDecorator;
 
-class Slack extends NotifierDecorator
+class Sms extends NotifierDecorator
 {
     /**
      * @param string $notification
@@ -15,7 +15,7 @@ class Slack extends NotifierDecorator
         parent::notify($notification, $recipients);
 
         foreach ($recipients[static::class] as $recipient) {
-            echo 'Send Slack notification: ' . $notification . ' to ' . $recipient . PHP_EOL;
+            echo 'Send Sms notification: ' . $notification . ' to ' . $recipient . PHP_EOL;
         }
     }
 }

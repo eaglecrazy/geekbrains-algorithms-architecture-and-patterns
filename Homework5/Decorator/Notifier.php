@@ -1,6 +1,6 @@
 <?php
 
-namespace Homework5;
+namespace Homework5\Decorator;
 
 interface Notifier
 {
