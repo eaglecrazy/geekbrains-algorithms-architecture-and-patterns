@@ -8,21 +8,23 @@
 
 $separator = '***********************************' . PHP_EOL;
 
-
 class Editor
 {
-    public string  $text = '';
+    public string  $text          = '';
     public ?int    $selectedStart = null;
     public ?int    $selectedEnd   = null;
-    public ?string $clipboard = null;
-    private array  $stack         = [];
+    public ?string $clipboard     = null;
+    private array  $backup        = [];
+    private int    $counter = 0;
+    private int    $maxCounter = 0;
 
     public function __construct(string $text = '')
     {
         $this->text = $text;
+        $this->backup[] = $text;
     }
 
-    public function show()
+    public function show(): void
     {
         echo '"' . $this->text . '"' . PHP_EOL;
     }
@@ -35,7 +37,8 @@ class Editor
         echo '- выделен текст: "' . $this->getSelected() . '"' . PHP_EOL;
     }
 
-    public function setCursorPosition($position){
+    public function setCursorPosition($position)
+    {
         $this->selectedStart = $position;
         $this->selectedEnd   = $position;
     }
@@ -50,28 +53,32 @@ class Editor
         return substr($this->text, $this->selectedStart, $this->selectedEnd - $this->selectedStart);
     }
 
-    public function copySelected(): void {
+    public function copySelected(): void
+    {
         $this->clipboard = $this->getSelected();
 
-        if($this->clipboard){
-            echo '- текст скопирован: "' . $this->clipboard . '"'. PHP_EOL;
+        if ($this->clipboard) {
+            echo '- текст скопирован: "' . $this->clipboard . '"' . PHP_EOL;
         } else {
             echo '- попытка скопировать текст не выделен.' . PHP_EOL;
         }
     }
 
-    public function cutSelected(): void {
+    public function cutSelected(): void
+    {
         $this->clipboard = $this->getSelected();
         $this->deleteSelected();
+        $this->backup();
 
-        if($this->clipboard){
-            echo '- текст вырезан: "' . $this->clipboard . '"'. PHP_EOL;
+        if ($this->clipboard) {
+            echo '- текст вырезан: "' . $this->clipboard . '"' . PHP_EOL;
         } else {
             echo '- попытка вырезать, текст не выделен.' . PHP_EOL;
         }
     }
 
-    public function deleteSelected(){
+    public function deleteSelected(): void
+    {
         if ((!$this->selectedStart && $this->selectedStart != 0) || !$this->selectedEnd || $this->selectedStart === $this->selectedEnd) {
             return;
         }
@@ -81,19 +88,41 @@ class Editor
         $this->setCursorPosition($this->selectedStart);
     }
 
-    public function paste(){
+    public function paste(): void
+    {
         $this->deleteSelected();
         $this->text = substr_replace($this->text, $this->clipboard, $this->selectedStart, 0);
-        echo '- текст вставлен: "' . $this->clipboard . '"'. PHP_EOL;
-
+        $this->backup();
+        echo '- текст вставлен: "' . $this->clipboard . '"' . PHP_EOL;
     }
 
-    public function push(string $command, string $text, int $index)
+    private function backup(): void
     {
+        $this->counter++;
+        $this->maxCounter = $this->counter;
+        $this->backup[$this->counter] = $this->text;
     }
 
-    public function pop(string $command, string $text, int $index)
+    public function undo()
     {
+        if ($this->counter > 0) {
+            $this->counter--;
+            $this->text = $this->backup[$this->counter];
+            echo '- отмена' . PHP_EOL;
+        } else {
+            echo '- ничего не происходит' . PHP_EOL;
+        }
+    }
+
+    public function redo()
+    {
+        if ($this->counter < $this->maxCounter) {
+            $this->counter++;
+            $this->text = $this->backup[$this->counter];
+            echo '- возврат ввода' . PHP_EOL;
+        } else {
+            echo '- ничего не происходит' . PHP_EOL;
+        }
     }
 }
 
@@ -135,6 +164,24 @@ class CommandPaste extends Command
     {
         echo '- команда "Paste"' . PHP_EOL;
         $this->editor->paste();
+    }
+}
+
+class CommandUndo extends Command
+{
+    public function execute()
+    {
+        echo '- команда "Undo"' . PHP_EOL;
+        $this->editor->undo();
+    }
+}
+
+class CommandRedo extends Command
+{
+    public function execute()
+    {
+        echo '- команда "Redo"' . PHP_EOL;
+        $this->editor->redo();
     }
 }
 
@@ -182,35 +229,82 @@ class Paste extends Button
     }
 }
 
+class Undo extends Button
+{
+    public function click()
+    {
+        echo '- кнопка "Undo"' . PHP_EOL;
+        parent::click();
+    }
+}
+
+class Redo extends Button
+{
+    public function click()
+    {
+        echo '- кнопка "Redo"' . PHP_EOL;
+        parent::click();
+    }
+}
 
 $editor = new Editor('One of our favorite candies here in Denmark is Ga-Jol...');
 
 $copyButton  = new Copy();
 $cutButton   = new Cut();
 $pasteButton = new Paste();
+$undoButton  = new Undo();
+$redoButton  = new Redo();
 
 $copyCommand  = new CommandCopy($editor);
 $cutCommand   = new CommandCut($editor);
 $pasteCommand = new CommandPaste($editor);
+$undoCommand  = new CommandUndo($editor);
+$redoCommand  = new CommandRedo($editor);
 
 $copyButton->setCommand($copyCommand);
 $cutButton->setCommand($cutCommand);
 $pasteButton->setCommand($pasteCommand);
+$undoButton->setCommand($undoCommand);
+$redoButton->setCommand($redoCommand);
 
 echo $separator;
 $editor->show();
 
 echo $separator;
-$editor->setSelection(0,10);
+$editor->setSelection(0, 11);
 $copyButton->click();
 $editor->show();
 
 echo $separator;
-$cutButton->click();
-$editor->show();
-
-echo $separator;
+$editor->setCursorPosition(0);
 $pasteButton->click();
 $editor->show();
 
 echo $separator;
+$undoButton->click();//ok
+$editor->show();
+
+echo $separator;
+$undoButton->click();//nothing
+$editor->show();
+
+echo $separator;
+$redoButton->click();//ok
+$editor->show();
+
+echo $separator;
+$redoButton->click();//nothing
+$editor->show();
+
+echo $separator;
+$editor->setSelection(0, 11);
+$cutButton->click();
+$editor->show();
+
+echo $separator;
+$undoButton->click();//nothing
+$editor->show();
+
+echo $separator;
+$redoButton->click();//ok
+$editor->show();
