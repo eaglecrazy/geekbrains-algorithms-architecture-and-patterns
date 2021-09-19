@@ -1,0 +1,21 @@
+Найти и указать в проекте Front Controller и расписать классы, которые с ним взаимодействуют.
+
+**********************************************************************
+
+В учебном проекте роль Front Controller выполняет файл index.php. В нём:
+
+1. создаётся объект класса Request, который содержит параметры запроса.
+$request = Request::createFromGlobals();
+
+2. создаётся контейнер внедрения зависимостей ContainerBuilder и передаётся в реестр:
+$containerBuilder = new ContainerBuilder();
+Framework\Registry::addContainer($containerBuilder);
+
+3. создаётся ядро приложения Kernel в котором посредством роутера выбирается соответствующий контроллер
+на основе адреса запроса и его разобранных параметров, а потом управление передаётся выбранному контроллеру
+для обработки:
+return call_user_func_array($controller, $arguments);
+
+4. Ядро, после обработки запроса, возвращает объект класса Response, который отправляет ответ сервера.
+$response = (new Kernel($containerBuilder))->handle($request);
+$response->send();
