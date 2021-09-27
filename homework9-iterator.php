@@ -1,1 +1,1 @@
-<?php
+Домашнее задание в папке homework9-iterator
